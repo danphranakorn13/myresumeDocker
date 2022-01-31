@@ -33,6 +33,9 @@ RUN useradd -G www-data,root -u $uid -d /home/$user $user
 RUN mkdir -p /home/$user/.composer && \
     chown -R $user:$user /home/$user
 
+# Permission
+RUN chown -R www-data:www-data /var/www
+
 # Set working directory
 WORKDIR /var/www
 
