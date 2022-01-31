@@ -1,0 +1,74 @@
+version: "3.9"
+services:
+  #Mysl Service
+  db:
+    image: mysql
+    container_name: myresume_mysql
+    volumes:
+      - ./mysql/:/var/lib/mysql/
+    environment:
+      - MYSQL_ROOT_PASSWORD=@13Dsawcxzs
+      - MYSQL_DATABASE=myresume_db
+      - MYSQL_USER=myresume_user
+      - MYSQL_PASSWORD=myresume_password
+    restart: always
+    networks:
+      - myresume_network
+
+  #phpmyadmin
+  phpmyadmin:
+    depends_on:
+      - db
+    image: phpmyadmin
+    container_name: myresume_phpmyadmin
+    ports:
+      - 8081:80
+    environment:
+      - MYSQL_USERNAME=myresume_user
+      - MYSQL_ROOT_PASSWORD=myresume_password
+      - PMA_HOST=db
+    restart: always
+    networks:
+      - myresume_network
+
+  #Laravel App
+  app:
+    depends_on:
+      - db
+    build: 
+      args:
+        user: danphranakorn
+        uid: 1000
+      context: ./
+      dockerfile: Dockerfile
+    container_name: myresume_laravel
+    restart: always
+    volumes:
+      - ./laravel/:/var/www
+    expose:
+      - 9000
+    networks:
+      - myresume_network
+
+        
+  #Nginx Service
+  nginx:
+    depends_on:
+      - db
+      - app
+    image: nginx:stable-alpine
+    container_name: myresume_nginx
+    volumes:
+      - ./laravel/:/var/www
+      - ./nginx/conf/nginx.conf:/etc/nginx/conf/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+    ports:
+      - 8080:80
+    restart: always
+    networks:
+      - myresume_network
+      
+networks:
+  myresume_network:
+    name: myresume_backend_network
+    driver: bridge
