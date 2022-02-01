@@ -37,7 +37,7 @@ services:
       - db
     build: 
       args:
-        user: danphranakorn
+        user: dan
         uid: 1000
       context: ./
       dockerfile: Dockerfile
